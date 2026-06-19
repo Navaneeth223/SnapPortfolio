@@ -1,5 +1,7 @@
+import { GitHubContribution } from '@/types/github.types';
+
 interface ContributionHeatmapProps {
-  contributions: { date: string; count: number; level: 0 | 1 | 2 | 3 | 4 }[];
+  contributions: GitHubContribution[];
   accentColor: string;
 }
 
@@ -8,31 +10,42 @@ export function ContributionHeatmap({
   accentColor,
 }: ContributionHeatmapProps) {
   // Group contributions by week
-  const weeks: typeof contributions[] = [];
-  let currentWeek: typeof contributions = [];
+  const weeks: GitHubContribution[][] = [];
+  let currentWeek: GitHubContribution[] = [];
 
-  contributions.forEach((day, index) => {
-    currentWeek.push(day);
-    if (currentWeek.length === 7 || index === contributions.length - 1) {
+  contributions.forEach((contrib, index) => {
+    const date = new Date(contrib.date);
+    const dayOfWeek = date.getDay();
+
+    currentWeek.push(contrib);
+
+    // If Sunday (6) or last item, complete the week
+    if (dayOfWeek === 6 || index === contributions.length - 1) {
       weeks.push([...currentWeek]);
       currentWeek = [];
     }
   });
 
   const getLevelColor = (level: number): string => {
-    const alpha = [0.1, 0.3, 0.5, 0.7, 1];
-    return `${accentColor}${Math.round(alpha[level] * 255).toString(16).padStart(2, '0')}`;
+    const colors = {
+      0: '#161B22',
+      1: `${accentColor}33`, // 20% opacity
+      2: `${accentColor}66`, // 40% opacity
+      3: `${accentColor}99`, // 60% opacity
+      4: accentColor, // 100%
+    };
+    return colors[level as keyof typeof colors] || colors[0];
   };
 
   return (
-    <div className="bg-[#16161A] rounded-lg border border-gray-800 p-6 overflow-x-auto">
-      <div className="inline-flex gap-1">
+    <div className="bg-[#161B22] border border-[#30363D] rounded-lg p-4 overflow-x-auto">
+      <div className="flex gap-1">
         {weeks.slice(-52).map((week, weekIndex) => (
           <div key={weekIndex} className="flex flex-col gap-1">
             {week.map((day, dayIndex) => (
               <div
-                key={dayIndex}
-                className="w-3 h-3 rounded-sm"
+                key={`${weekIndex}-${dayIndex}`}
+                className="w-3 h-3 rounded-sm transition-colors hover:ring-1 hover:ring-[#E6EDF3]"
                 style={{ backgroundColor: getLevelColor(day.level) }}
                 title={`${day.date}: ${day.count} contributions`}
               />
@@ -41,7 +54,7 @@ export function ContributionHeatmap({
         ))}
       </div>
 
-      <div className="mt-4 flex items-center gap-2 text-xs text-gray-500">
+      <div className="flex items-center justify-end gap-2 mt-4 text-xs text-[#7D8590]">
         <span>Less</span>
         {[0, 1, 2, 3, 4].map((level) => (
           <div

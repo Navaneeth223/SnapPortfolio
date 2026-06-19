@@ -19,7 +19,7 @@ export function GalleryTemplate({ portfolio, projects }: GalleryTemplateProps) {
 
   return (
     <div
-      className="min-h-screen bg-white"
+      className="min-h-screen bg-[#FAFAF8]"
       style={{
         ['--accent-color' as any]: accentColor,
       }}
@@ -33,15 +33,15 @@ export function GalleryTemplate({ portfolio, projects }: GalleryTemplateProps) {
             return (
               <section
                 key="about"
-                className="max-w-4xl mx-auto px-6 py-16"
+                className="max-w-6xl mx-auto px-6 py-16"
               >
                 <h2
-                  className="font-display text-4xl font-bold mb-6"
+                  className="font-display text-3xl font-semibold mb-6"
                   style={{ color: accentColor }}
                 >
-                  About Me
+                  About
                 </h2>
-                <p className="text-lg text-gray-700 leading-relaxed">
+                <p className="text-lg text-[#5C5C66] leading-relaxed max-w-3xl">
                   {portfolio.bio}
                 </p>
               </section>
@@ -52,52 +52,40 @@ export function GalleryTemplate({ portfolio, projects }: GalleryTemplateProps) {
             return (
               <section
                 key="skills"
-                className="bg-gray-50 py-16"
+                className="max-w-6xl mx-auto px-6 py-16 bg-white"
               >
-                <div className="max-w-6xl mx-auto px-6">
-                  <h2
-                    className="font-display text-4xl font-bold mb-8 text-center"
-                    style={{ color: accentColor }}
-                  >
-                    Skills & Tools
-                  </h2>
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-                    {portfolio.skills.map((skill) => (
-                      <div
-                        key={skill.name}
-                        className="bg-white rounded-lg p-4 text-center shadow-sm hover:shadow-md transition-shadow"
-                      >
-                        <div className="font-semibold text-gray-800">
-                          {skill.name}
-                        </div>
-                        {skill.proficiency > 0 && (
-                          <div className="mt-2 bg-gray-200 rounded-full h-1.5">
-                            <div
-                              className="h-1.5 rounded-full"
-                              style={{
-                                width: `${skill.proficiency}%`,
-                                backgroundColor: accentColor,
-                              }}
-                            />
-                          </div>
-                        )}
+                <h2
+                  className="font-display text-3xl font-semibold mb-8"
+                  style={{ color: accentColor }}
+                >
+                  Skills
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                  {portfolio.skills.map((skill) => (
+                    <div
+                      key={skill.name}
+                      className="text-center p-4 bg-[#F3F2EE] rounded-lg"
+                    >
+                      <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center text-xl">
+                        {skill.name[0]}
                       </div>
-                    ))}
-                  </div>
+                      <div className="font-medium text-sm">{skill.name}</div>
+                    </div>
+                  ))}
                 </div>
               </section>
             );
 
           case 'projects':
             return (
-              <section key="projects" className="py-16">
+              <section key="projects" className="max-w-7xl mx-auto px-6 py-16">
                 {pinnedProjects.length > 0 && (
-                  <div className="max-w-7xl mx-auto px-6 mb-16">
+                  <div className="mb-16">
                     <h2
-                      className="font-display text-4xl font-bold mb-8"
+                      className="font-display text-3xl font-semibold mb-8"
                       style={{ color: accentColor }}
                     >
-                      Featured Work
+                      Featured Projects
                     </h2>
                     <GalleryMasonry
                       projects={pinnedProjects}
@@ -108,9 +96,9 @@ export function GalleryTemplate({ portfolio, projects }: GalleryTemplateProps) {
                 )}
 
                 {regularProjects.length > 0 && (
-                  <div className="max-w-7xl mx-auto px-6">
+                  <div>
                     <h2
-                      className="font-display text-4xl font-bold mb-8"
+                      className="font-display text-3xl font-semibold mb-8"
                       style={{ color: accentColor }}
                     >
                       {pinnedProjects.length > 0 ? 'More Projects' : 'Projects'}
@@ -126,40 +114,50 @@ export function GalleryTemplate({ portfolio, projects }: GalleryTemplateProps) {
 
           case 'contact':
             return (
-              <footer
+              <section
                 key="contact"
-                className="py-16"
-                style={{ backgroundColor: accentColor }}
+                className="bg-white border-t border-[#ECEBE6] py-16"
               >
-                <div className="max-w-4xl mx-auto px-6 text-center text-white">
-                  <h2 className="font-display text-4xl font-bold mb-4">
-                    Let&apos;s Work Together
+                <div className="max-w-6xl mx-auto px-6 text-center">
+                  <h2
+                    className="font-display text-3xl font-semibold mb-4"
+                    style={{ color: accentColor }}
+                  >
+                    Let's work together
                   </h2>
                   {portfolio.links.email && (
                     <a
                       href={`mailto:${portfolio.links.email}`}
-                      className="inline-block mt-4 px-8 py-3 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+                      className="text-xl hover:underline"
+                      style={{ color: accentColor }}
                     >
-                      Get in Touch
+                      {portfolio.links.email}
                     </a>
                   )}
-                  <div className="mt-12 text-sm opacity-80">
-                    Built with{' '}
-                    <a
-                      href="https://snapportfolio.app"
-                      className="underline hover:no-underline"
-                    >
-                      SnapPortfolio
-                    </a>
-                  </div>
                 </div>
-              </footer>
+              </section>
             );
 
           default:
             return null;
         }
       })}
+
+      {/* Footer */}
+      <footer className="bg-[#16161A] text-white py-8">
+        <div className="max-w-6xl mx-auto px-6 text-center text-sm">
+          Built with{' '}
+          <a
+            href="https://snapportfolio.app"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline"
+            style={{ color: accentColor }}
+          >
+            SnapPortfolio
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
