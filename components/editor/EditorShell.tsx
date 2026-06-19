@@ -6,152 +6,158 @@ import { Button } from '@/components/ui/button';
 import { LivePreviewFrame } from './LivePreviewFrame';
 import { 
   FileText, 
-  FolderOpen, 
+  FolderGit2, 
   Palette, 
   Globe, 
-  Monitor, 
-  Smartphone,
-  ArrowLeft,
   Save,
-  Eye
+  Eye,
+  EyeOff,
+  Monitor,
+  Smartphone
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useEditorStore } from '@/hooks/useEditorStore';
 import { toast } from 'sonner';
 
 type EditorTab = 'content' | 'projects' | 'design' | 'domain';
 
 interface EditorShellProps {
-  children: ReactNode;
   activeTab: EditorTab;
   onTabChange: (tab: EditorTab) => void;
+  children: ReactNode;
 }
 
 const tabs = [
-  { id: 'content' as EditorTab, label: 'Content', icon: FileText },
-  { id: 'projects' as EditorTab, label: 'Projects', icon: FolderOpen },
-  { id: 'design' as EditorTab, label: 'Design', icon: Palette },
-  { id: 'domain' as EditorTab, label: 'Domain', icon: Globe },
-];
+  { id: 'content', label: 'Content', icon: FileText },
+  { id: 'projects', label: 'Projects', icon: FolderGit2 },
+  { id: 'design', label: 'Design', icon: Palette },
+  { id: 'domain', label: 'Domain', icon: Globe },
+] as const;
 
-export function EditorShell({ children, activeTab, onTabChange }: EditorShellProps) {
+export function EditorShell({ activeTab, onTabChange, children }: EditorShellProps) {
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+  const [showPreview, setShowPreview] = useState(true);
   const { isDirty } = useEditorStore();
 
   const handleSave = async () => {
-    // TODO: Implement save to backend
-    toast.success('Changes saved successfully');
+    // TODO: Implement save logic
+    toast.success('Changes saved!');
   };
 
   const handlePublish = async () => {
-    // TODO: Implement publish
+    // TODO: Implement publish logic
     toast.success('Portfolio published!');
   };
 
   return (
     <div className="h-screen flex flex-col bg-bg-base">
       {/* Top Bar */}
-      <header className="bg-bg-surface border-b border-border-subtle px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Button>
+      <header className="bg-bg-surface border-b border-border-subtle px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-6">
+          <Link href="/dashboard" className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-accent-primary rounded-md" />
+            <span className="font-display font-bold">SnapPortfolio</span>
           </Link>
-          <div className="h-6 w-px bg-border-default" />
-          <h1 className="font-display font-semibold text-lg">Portfolio Editor</h1>
-          {isDirty && (
-            <span className="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded">
-              Unsaved changes
-            </span>
-          )}
+          
+          <nav className="flex items-center gap-1">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => onTabChange(tab.id as EditorTab)}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === tab.id
+                      ? 'bg-accent-tint text-accent-primary'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-bg-muted'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 inline mr-2" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </nav>
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="secondary" size="sm" onClick={handleSave} disabled={!isDirty}>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleSave}
+            disabled={!isDirty}
+          >
             <Save className="w-4 h-4 mr-2" />
-            Save Draft
+            {isDirty ? 'Save Draft' : 'Saved'}
           </Button>
           <Button size="sm" onClick={handlePublish}>
-            <Eye className="w-4 h-4 mr-2" />
-            Publish
+            Publish →
           </Button>
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main Editor Layout */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel: Controls */}
-        <div className="w-[420px] border-r border-border-subtle bg-bg-surface flex flex-col">
-          {/* Tabs */}
-          <div className="border-b border-border-subtle">
-            <div className="flex">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <button
-                    key={tab.id}
-                    onClick={() => onTabChange(tab.id)}
-                    className={cn(
-                      'flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium transition-colors border-b-2',
-                      activeTab === tab.id
-                        ? 'border-accent-primary text-accent-primary bg-accent-tint'
-                        : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-bg-muted'
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span>{tab.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Tab Content */}
-          <div className="flex-1 overflow-y-auto p-6">
+        {/* Left: Controls */}
+        <aside className="w-[420px] border-r border-border-subtle bg-bg-surface overflow-y-auto">
+          <div className="p-6">
             {children}
           </div>
-        </div>
+        </aside>
 
-        {/* Right Panel: Live Preview */}
-        <div className="flex-1 bg-bg-muted flex flex-col">
+        {/* Right: Live Preview */}
+        <main className="flex-1 flex flex-col bg-bg-muted">
           {/* Preview Controls */}
-          <div className="bg-bg-surface border-b border-border-subtle px-4 py-2 flex items-center justify-between">
+          <div className="bg-bg-surface border-b border-border-subtle px-6 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setPreviewDevice('desktop')}
-                className={cn(
-                  'p-2 rounded transition-colors',
+                className={`p-2 rounded-md transition-colors ${
                   previewDevice === 'desktop'
                     ? 'bg-accent-tint text-accent-primary'
-                    : 'text-text-muted hover:text-text-primary hover:bg-bg-muted'
-                )}
+                    : 'text-text-secondary hover:bg-bg-muted'
+                }`}
+                title="Desktop view"
               >
                 <Monitor className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setPreviewDevice('mobile')}
-                className={cn(
-                  'p-2 rounded transition-colors',
+                className={`p-2 rounded-md transition-colors ${
                   previewDevice === 'mobile'
                     ? 'bg-accent-tint text-accent-primary'
-                    : 'text-text-muted hover:text-text-primary hover:bg-bg-muted'
-                )}
+                    : 'text-text-secondary hover:bg-bg-muted'
+                }`}
+                title="Mobile view"
               >
                 <Smartphone className="w-4 h-4" />
               </button>
             </div>
-            <span className="text-xs text-text-muted">
-              Live Preview
-            </span>
+
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className="text-text-secondary hover:text-text-primary text-sm flex items-center gap-2"
+            >
+              {showPreview ? (
+                <>
+                  <EyeOff className="w-4 h-4" />
+                  Hide Preview
+                </>
+              ) : (
+                <>
+                  <Eye className="w-4 h-4" />
+                  Show Preview
+                </>
+              )}
+            </button>
           </div>
 
           {/* Preview Frame */}
-          <div className="flex-1 p-6 overflow-auto">
-            <LivePreviewFrame device={previewDevice} />
-          </div>
-        </div>
+          {showPreview && (
+            <div className="flex-1 p-6 overflow-auto">
+              <LivePreviewFrame device={previewDevice} />
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );

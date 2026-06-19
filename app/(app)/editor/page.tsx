@@ -23,7 +23,7 @@ export default function EditorPage() {
       case 'domain':
         return <DomainTab />;
       default:
-        return null;
+        return <ContentTab />;
     }
   };
 
