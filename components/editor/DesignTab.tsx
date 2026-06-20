@@ -1,56 +1,69 @@
 'use client';
 
-import { TEMPLATES, COLOR_PRESETS, FONT_PAIRS } from '@/lib/constants';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Check, Sparkles } from 'lucide-react';
+import { useState } from 'react';
+import { TEMPLATES, FONT_PAIRS, COLOR_PRESETS } from '@/lib/constants';
 import { useEditorStore } from '@/hooks/useEditorStore';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Check, Sparkles } from 'lucide-react';
 
 export function DesignTab() {
   const { portfolio, updatePortfolio } = useEditorStore();
+  const [customColor, setCustomColor] = useState(portfolio?.accentColor || '#FF5A1F');
 
-  const selectedTemplate = portfolio?.template || 'monolith';
-  const selectedColor = portfolio?.accentColor || '#FF5A1F';
-  const selectedFontPair = portfolio?.fontPair || 'editorial';
-  const colorMode = portfolio?.colorMode || 'light';
+  const handleTemplateChange = (templateId: string) => {
+    updatePortfolio({ template: templateId as any });
+  };
+
+  const handleColorChange = (color: string) => {
+    setCustomColor(color);
+    updatePortfolio({ accentColor: color });
+  };
+
+  const handleColorModeChange = (mode: 'light' | 'dark' | 'auto') => {
+    updatePortfolio({ colorMode: mode });
+  };
+
+  const handleFontChange = (fontPair: string) => {
+    updatePortfolio({ fontPair });
+  };
 
   return (
     <div className="space-y-8">
       <div>
         <h2 className="font-display text-xl font-semibold mb-1">Design</h2>
         <p className="text-sm text-text-secondary">
-          Customize the look and feel of your portfolio
+          Customize the look and feel
         </p>
       </div>
 
       {/* Template Picker */}
       <section className="space-y-4">
-        <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
-          Template
-        </h3>
-
+        <Label>Template</Label>
         <div className="grid grid-cols-2 gap-3">
           {TEMPLATES.map((template) => (
             <button
               key={template.id}
-              onClick={() => updatePortfolio({ template: template.id })}
-              className={`text-left p-3 rounded-lg border-2 transition-all ${
-                selectedTemplate === template.id
+              onClick={() => handleTemplateChange(template.id)}
+              className={`relative text-left p-3 rounded-lg border-2 transition-all ${
+                portfolio?.template === template.id
                   ? 'border-accent-primary bg-accent-tint'
                   : 'border-border-default hover:border-border-strong'
               }`}
             >
-              <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded mb-2 flex items-center justify-center text-xs font-mono text-text-muted">
-                [{template.id}]
+              {portfolio?.template === template.id && (
+                <div className="absolute top-2 right-2 w-5 h-5 bg-accent-primary rounded-full flex items-center justify-center">
+                  <Check className="w-3 h-3 text-white" />
+                </div>
+              )}
+              <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded mb-2 flex items-center justify-center">
+                <span className="text-xs font-mono text-text-muted">
+                  [{template.id}]
+                </span>
               </div>
-              <h4 className="font-semibold text-sm mb-1">
-                {template.name}
-                {selectedTemplate === template.id && (
-                  <Check className="w-4 h-4 inline ml-2 text-accent-primary" />
-                )}
-              </h4>
-              <p className="text-xs text-text-secondary line-clamp-2">
+              <h4 className="font-semibold text-sm">{template.name}</h4>
+              <p className="text-xs text-text-secondary mt-1">
                 {template.description}
               </p>
             </button>
@@ -61,9 +74,7 @@ export function DesignTab() {
       {/* Color Picker */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
-            Accent Color
-          </h3>
+          <Label>Accent Color</Label>
           <Button variant="ghost" size="sm">
             <Sparkles className="w-4 h-4 mr-2" />
             Auto from avatar
@@ -75,65 +86,55 @@ export function DesignTab() {
           {COLOR_PRESETS.map((preset) => (
             <button
               key={preset.hex}
-              onClick={() => updatePortfolio({ accentColor: preset.hex })}
-              className={`aspect-square rounded-lg border-2 transition-all ${
-                selectedColor === preset.hex
-                  ? 'border-gray-800 scale-110'
-                  : 'border-border-subtle hover:scale-105'
+              onClick={() => handleColorChange(preset.hex)}
+              className={`aspect-square rounded-lg border-2 transition-all relative ${
+                portfolio?.accentColor === preset.hex
+                  ? 'border-text-primary scale-110'
+                  : 'border-transparent hover:scale-105'
               }`}
               style={{ backgroundColor: preset.hex }}
               title={preset.name}
             >
-              {selectedColor === preset.hex && (
-                <Check className="w-4 h-4 text-white m-auto" />
+              {portfolio?.accentColor === preset.hex && (
+                <Check className="w-4 h-4 text-white absolute inset-0 m-auto" />
               )}
             </button>
           ))}
         </div>
 
         {/* Custom Color */}
-        <div>
-          <Label htmlFor="customColor">Custom Color</Label>
-          <div className="flex items-center gap-2">
-            <Input
-              id="customColor"
-              type="color"
-              value={selectedColor}
-              onChange={(e) => updatePortfolio({ accentColor: e.target.value })}
-              className="w-20 h-10 cursor-pointer"
-            />
-            <Input
-              type="text"
-              value={selectedColor}
-              onChange={(e) => updatePortfolio({ accentColor: e.target.value })}
-              placeholder="#FF5A1F"
-              className="flex-1 font-mono"
-            />
-          </div>
+        <div className="flex gap-2">
+          <Input
+            type="color"
+            value={customColor}
+            onChange={(e) => handleColorChange(e.target.value)}
+            className="w-16 h-10 cursor-pointer"
+          />
+          <Input
+            type="text"
+            value={customColor}
+            onChange={(e) => handleColorChange(e.target.value)}
+            placeholder="#FF5A1F"
+            className="flex-1 font-mono"
+          />
         </div>
       </section>
 
       {/* Color Mode */}
       <section className="space-y-4">
-        <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
-          Color Mode
-        </h3>
-
+        <Label>Color Mode</Label>
         <div className="grid grid-cols-3 gap-2">
           {(['light', 'dark', 'auto'] as const).map((mode) => (
             <button
               key={mode}
-              onClick={() => updatePortfolio({ colorMode: mode })}
-              className={`p-3 rounded-lg border-2 capitalize transition-all ${
-                colorMode === mode
-                  ? 'border-accent-primary bg-accent-tint'
+              onClick={() => handleColorModeChange(mode)}
+              className={`py-2 px-3 text-sm rounded-md border-2 font-medium transition-all ${
+                portfolio?.colorMode === mode
+                  ? 'border-accent-primary bg-accent-tint text-accent-primary'
                   : 'border-border-default hover:border-border-strong'
               }`}
             >
-              {mode}
-              {colorMode === mode && (
-                <Check className="w-4 h-4 inline ml-2 text-accent-primary" />
-              )}
+              {mode.charAt(0).toUpperCase() + mode.slice(1)}
             </button>
           ))}
         </div>
@@ -141,48 +142,41 @@ export function DesignTab() {
 
       {/* Typography */}
       <section className="space-y-4">
-        <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
-          Typography
-        </h3>
-
+        <Label>Typography</Label>
         <div className="space-y-2">
           {Object.entries(FONT_PAIRS).map(([key, pair]) => (
             <button
               key={key}
-              onClick={() => updatePortfolio({ fontPair: key })}
+              onClick={() => handleFontChange(key)}
               className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                selectedFontPair === key
+                portfolio?.fontPair === key
                   ? 'border-accent-primary bg-accent-tint'
                   : 'border-border-default hover:border-border-strong'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-semibold mb-1">{pair.name}</h4>
-                  <p className="text-sm text-text-secondary">
-                    {pair.display} · {pair.body}
-                  </p>
-                </div>
-                {selectedFontPair === key && (
-                  <Check className="w-5 h-5 text-accent-primary" />
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-semibold">{pair.name}</span>
+                {portfolio?.fontPair === key && (
+                  <Check className="w-4 h-4 text-accent-primary" />
                 )}
+              </div>
+              <div className="text-sm text-text-secondary space-y-1">
+                <div>Display: {pair.display}</div>
+                <div>Body: {pair.body}</div>
               </div>
             </button>
           ))}
         </div>
       </section>
 
-      {/* GitHub Stats Display */}
+      {/* GitHub Stats */}
       <section className="space-y-4">
-        <h3 className="font-semibold text-sm text-text-secondary uppercase tracking-wide">
-          GitHub Stats
-        </h3>
-
+        <Label>GitHub Stats Display</Label>
         <div className="space-y-3">
-          <label className="flex items-center gap-3 cursor-pointer">
+          <label className="flex items-center gap-3">
             <input
               type="checkbox"
-              checked={portfolio?.showContributionGraph ?? true}
+              checked={portfolio?.showContributionGraph}
               onChange={(e) =>
                 updatePortfolio({ showContributionGraph: e.target.checked })
               }
@@ -190,17 +184,16 @@ export function DesignTab() {
             />
             <span className="text-sm">Show contribution heatmap</span>
           </label>
-
-          <label className="flex items-center gap-3 cursor-pointer">
+          <label className="flex items-center gap-3">
             <input
               type="checkbox"
-              checked={portfolio?.showGithubStats ?? true}
+              checked={portfolio?.showGithubStats}
               onChange={(e) =>
                 updatePortfolio({ showGithubStats: e.target.checked })
               }
               className="w-4 h-4 rounded border-border-default text-accent-primary focus:ring-accent-ring"
             />
-            <span className="text-sm">Show stats (followers, stars, repos)</span>
+            <span className="text-sm">Show stats (followers, total stars, repo count)</span>
           </label>
         </div>
       </section>
