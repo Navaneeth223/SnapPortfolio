@@ -3,77 +3,32 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { RefreshCw, Search, Pin, Eye, EyeOff, Edit } from 'lucide-react';
-import { LanguageBadge } from '@/components/shared/LanguageBadge';
-import { StatPill } from '@/components/shared/StatPill';
-
-// Mock project data
-const mockProjects = [
-  {
-    _id: '1',
-    repoName: 'freelanceflow',
-    displayTitle: 'FreelanceFlow',
-    displayDescription: 'Freelance management SaaS platform',
-    primaryLanguage: 'TypeScript',
-    stars: 14,
-    forks: 3,
-    isPinned: true,
-    isIncluded: true,
-  },
-  {
-    _id: '2',
-    repoName: 'portfolio-v2',
-    displayTitle: 'Portfolio v2',
-    displayDescription: 'Personal portfolio website',
-    primaryLanguage: 'JavaScript',
-    stars: 3,
-    forks: 0,
-    isPinned: false,
-    isIncluded: true,
-  },
-  {
-    _id: '3',
-    repoName: 'cli-tool',
-    displayTitle: 'CLI Tool',
-    displayDescription: 'Command line productivity tool',
-    primaryLanguage: 'Go',
-    stars: 8,
-    forks: 2,
-    isPinned: false,
-    isIncluded: false,
-  },
-];
+import { RefreshCw, Search } from 'lucide-react';
+import { ProjectEditCard } from './ProjectEditCard';
+import { useEditorStore } from '@/hooks/useEditorStore';
 
 export function ProjectsTab() {
-  const [projects, setProjects] = useState(mockProjects);
-  const [filter, setFilter] = useState<'all' | 'included' | 'excluded' | 'pinned'>('all');
+  const { projects } = useEditorStore();
   const [searchQuery, setSearchQuery] = useState('');
+  const [filter, setFilter] = useState<'all' | 'included' | 'excluded' | 'pinned'>('all');
 
   const filteredProjects = projects.filter((project) => {
-    const matchesSearch = project.displayTitle.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = project.displayTitle
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     
-    switch (filter) {
-      case 'included':
-        return project.isIncluded && matchesSearch;
-      case 'excluded':
-        return !project.isIncluded && matchesSearch;
-      case 'pinned':
-        return project.isPinned && matchesSearch;
-      default:
-        return matchesSearch;
-    }
+    const matchesFilter =
+      filter === 'all' ||
+      (filter === 'included' && project.isIncluded) ||
+      (filter === 'excluded' && !project.isIncluded) ||
+      (filter === 'pinned' && project.isPinned);
+
+    return matchesSearch && matchesFilter;
   });
 
-  const togglePin = (id: string) => {
-    setProjects(projects.map(p => 
-      p._id === id ? { ...p, isPinned: !p.isPinned } : p
-    ));
-  };
-
-  const toggleIncluded = (id: string) => {
-    setProjects(projects.map(p => 
-      p._id === id ? { ...p, isIncluded: !p.isIncluded } : p
-    ));
+  const stats = {
+    total: projects.length,
+    included: projects.filter((p) => p.isIncluded).length,
   };
 
   return (
@@ -81,17 +36,22 @@ export function ProjectsTab() {
       <div>
         <h2 className="font-display text-xl font-semibold mb-1">Projects</h2>
         <p className="text-sm text-text-secondary">
-          {projects.length} repos found · {projects.filter(p => p.isIncluded).length} shown on portfolio
+          {stats.total} repos found · {stats.included} shown on portfolio
         </p>
       </div>
 
       {/* Sync Button */}
-      <Button variant="secondary" size="sm">
-        <RefreshCw className="w-4 h-4 mr-2" />
-        Re-sync from GitHub
-      </Button>
+      <div>
+        <Button variant="secondary" size="sm">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Re-sync from GitHub
+        </Button>
+        <p className="text-xs text-text-muted mt-2">
+          Last synced 2 hours ago
+        </p>
+      </div>
 
-      {/* Filter Bar */}
+      {/* Search & Filter */}
       <div className="space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
@@ -108,110 +68,37 @@ export function ProjectsTab() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium capitalize transition-colors ${
                 filter === f
                   ? 'bg-accent-tint text-accent-primary'
-                  : 'text-text-secondary hover:bg-bg-muted'
+                  : 'bg-bg-muted text-text-secondary hover:bg-border-subtle'
               }`}
             >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
+              {f}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Project List */}
+      {/* Projects List */}
       <div className="space-y-3">
-        {filteredProjects.map((project) => (
-          <ProjectCard
-            key={project._id}
-            project={project}
-            onTogglePin={() => togglePin(project._id)}
-            onToggleIncluded={() => toggleIncluded(project._id)}
-          />
-        ))}
-
-        {filteredProjects.length === 0 && (
-          <div className="text-center py-12 text-text-muted">
-            No projects found
+        {filteredProjects.length > 0 ? (
+          filteredProjects.map((project) => (
+            <ProjectEditCard key={project._id} project={project} />
+          ))
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-text-muted">No projects found</p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-sm text-accent-primary hover:underline mt-2"
+              >
+                Clear search
+              </button>
+            )}
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function ProjectCard({
-  project,
-  onTogglePin,
-  onToggleIncluded,
-}: {
-  project: typeof mockProjects[0];
-  onTogglePin: () => void;
-  onToggleIncluded: () => void;
-}) {
-  return (
-    <div
-      className={`p-4 rounded-lg border transition-all ${
-        project.isIncluded
-          ? 'border-border-default bg-bg-surface'
-          : 'border-border-subtle bg-bg-muted opacity-60'
-      }`}
-    >
-      <div className="flex items-start gap-3">
-        {/* Checkbox */}
-        <input
-          type="checkbox"
-          checked={project.isIncluded}
-          onChange={onToggleIncluded}
-          className="mt-1"
-        />
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h3 className="font-semibold">{project.displayTitle}</h3>
-              <p className="text-sm text-text-muted font-mono">
-                {project.repoName}
-              </p>
-            </div>
-            
-            {/* Actions */}
-            <div className="flex items-center gap-1">
-              <button
-                onClick={onTogglePin}
-                className={`p-2 rounded transition-colors ${
-                  project.isPinned
-                    ? 'text-accent-primary bg-accent-tint'
-                    : 'text-text-muted hover:bg-bg-muted'
-                }`}
-                title={project.isPinned ? 'Unpin' : 'Pin to top'}
-              >
-                <Pin className="w-4 h-4" />
-              </button>
-              <button
-                className="p-2 rounded text-text-muted hover:bg-bg-muted transition-colors"
-                title="Edit project"
-              >
-                <Edit className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <p className="text-sm text-text-secondary mb-3">
-            {project.displayDescription}
-          </p>
-
-          {/* Meta */}
-          <div className="flex items-center gap-3">
-            {project.primaryLanguage && (
-              <LanguageBadge language={project.primaryLanguage} />
-            )}
-            <StatPill type="stars" value={project.stars} />
-            <StatPill type="forks" value={project.forks} />
-          </div>
-        </div>
       </div>
     </div>
   );
