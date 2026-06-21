@@ -35,12 +35,14 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Routes will be added here
-// app.use('/api/v1/auth', authRoutes);
-// app.use('/api/v1/github', githubRoutes);
-// app.use('/api/v1/portfolio', portfolioRoutes);
-// app.use('/api/v1/projects', projectRoutes);
-// app.use('/api/v1/analytics', analyticsRoutes);
+// Routes
+import githubRoutes from './routes/github.routes';
+import portfolioRoutes from './routes/portfolio.routes';
+import analyticsRoutes from './routes/analytics.routes';
+
+app.use('/api/v1/github', githubRoutes);
+app.use('/api/v1/portfolio', portfolioRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
 
 // 404 handler
 app.use((req, res) => {
