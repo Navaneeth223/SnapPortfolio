@@ -1,8 +1,14 @@
 # SnapPortfolio
 
-**GitHub to Portfolio in 30 Seconds**
+**GitHub to Portfolio in 30 Seconds** 🚀
 
 Turn your GitHub repos into a beautiful, customizable portfolio site. No manual data entry. No drag-and-drop builder. Just GitHub in, polished portfolio out.
+
+[![Status](https://img.shields.io/badge/status-85%25%20complete-brightgreen)]()
+[![License](https://img.shields.io/badge/license-MIT-blue)]()
+[![Node](https://img.shields.io/badge/node-20%2B-brightgreen)]()
+
+[Live Demo](#) • [Documentation](./SETUP.md) • [Deployment Guide](./DEPLOYMENT.md)
 
 ## 🎯 Features
 
