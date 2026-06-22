@@ -12,25 +12,25 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error('Error:', error);
+    console.error('App error:', error);
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-bg-base flex items-center justify-center px-6">
+    <div className="min-h-screen flex items-center justify-center bg-bg-base px-6">
       <div className="text-center max-w-md">
-        <AlertTriangle className="w-16 h-16 text-orange-500 mx-auto mb-6" />
-        <h1 className="font-display text-3xl font-bold mb-3">
+        <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-6">
+          <AlertTriangle className="w-8 h-8 text-red-500" />
+        </div>
+        <h1 className="font-display text-2xl font-bold mb-2">
           Something went wrong
         </h1>
         <p className="text-text-secondary mb-6">
-          We encountered an unexpected error. Please try again.
+          We encountered an error. Don't worry, your data is safe.
         </p>
-        <div className="flex gap-3 justify-center">
+        <div className="flex items-center justify-center gap-4">
+          <Button onClick={reset}>Try Again</Button>
           <Button variant="secondary" onClick={() => window.location.href = '/'}>
             Go Home
-          </Button>
-          <Button onClick={reset}>
-            Try Again
           </Button>
         </div>
       </div>
