@@ -39,10 +39,12 @@ app.get('/health', (req, res) => {
 import githubRoutes from './routes/github.routes';
 import portfolioRoutes from './routes/portfolio.routes';
 import analyticsRoutes from './routes/analytics.routes';
+import projectRoutes from './routes/project.routes';
 
 app.use('/api/v1/github', githubRoutes);
 app.use('/api/v1/portfolio', portfolioRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/projects', projectRoutes);
 
 // 404 handler
 app.use((req, res) => {
